@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès Sécurisé - Authentification Requise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .header i {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+        }
+        
+        .form-container {
+            padding: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #2c3e50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #1a252f;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f5f7fb;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 14px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .hidden-link-container {
+            display: none;
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .hidden-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .hidden-link:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
+        }
+        
+        .attempts-counter {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            margin-top: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lock"></i> Accès Protégé</h1>
+            <p>Authentification requise pour accéder à la ressource</p>
+        </div>
+        
+        <div class="form-container">
+            <div id="error-message" class="message error"></div>
+            <div id="success-message" class="message success">Connexion réussie! Accès autorisé.</div>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username"><i class="fas fa-user"></i> Identifiant</label>
+                    <input type="text" id="username" name="username" placeholder="Votre identifiant" required autocomplete="username">
+                </div>
+                
+                <div class="input-group">
+                    <label for="password"><i class="fas fa-key"></i> Mot de passe</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" placeholder="Votre mot de passe" required autocomplete="current-password">
+                        <span class="toggle-password" onclick="togglePassword()"><i class="fas fa-eye"></i></span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+                
+                <div class="attempts-counter">
+                    Tentatives restantes: <span id="attempts-left">3</span>
+                </div>
+            </form>
+            
+            <div id="hidden-link-container" class="hidden-link-container">
+                <p><i class="fas fa-check-circle"></i> Authentification réussie!</p>
+                <p>Vous avez maintenant accès à la ressource protégée.</p>
+                <a href="https://jeanskodoc.github.io/EDS/" id="hidden-link" class="hidden-link">
+                    <i class="fas fa-external-link-alt"></i> Accéder à la ressource
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><i class="fas fa-shield-alt"></i> Système d'authentification sécurisé</p>
+        </div>
+    </div>
+
+    <script>
+        // Compte créé selon vos instructions
+        const authorizedUsers = {
+            "KOLA": "KOLA1@"
+        };
+        
+        let loginAttempts = 3;
+        let isAuthenticated = false;
+        
+        // Fonction pour afficher/masquer le mot de passe
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+        
+        // Fonction pour afficher un message d'erreur
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Cacher le message après 5 secondes
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Fonction pour afficher un message de succès
+        function showSuccess() {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+            
+            // Afficher le lien caché
+            document.getElementById('hidden-link-container').style.display = 'block';
+            
+            // Cacher le formulaire
+            document.getElementById('login-form').style.display = 'none';
+        }
+        
+        // Fonction pour mettre à jour le compteur de tentatives
+        function updateAttemptsCounter() {
+            document.getElementById('attempts-left').textContent = loginAttempts;
+        }
+        
+        // Gestion de la soumission du formulaire
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (isAuthenticated) return;
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            const form = document.getElementById('login-form');
+            
+            // Réinitialiser les messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Validation
+            if (username && password) {
+                // Vérification des identifiants
+                if (authorizedUsers[username] === password) {
+                    isAuthenticated = true;
+                    showSuccess();
+                    
+                    // Désactiver les champs de formulaire
+                    document.getElementById('username').disabled = true;
+                    document.getElementById('password').disabled = true;
+                    document.querySelector('.btn').disabled = true;
+                } else {
+                    loginAttempts--;
+                    updateAttemptsCounter();
+                    
+                    if (loginAttempts <= 0) {
+                        showError("Trop de tentatives échouées. Veuillez réessayer plus tard.");
+                        document.getElementById('username').disabled = true;
+                        document.getElementById('password').disabled = true;
+                        document.querySelector('.btn').disabled = true;
+                    } else {
+                        showError("Identifiants incorrects. Il vous reste " + loginAttempts + " tentative(s).");
+                        form.classList.add('shake');
+                        setTimeout(() => form.classList.remove('shake'), 500);
+                    }
+                    
+                    // Effacer le mot de passe en cas d'erreur
+                    document.getElementById('password').value = '';
+                }
+            } else {
+                showError('Veuillez remplir tous les champs.');
+            }
+        });
+        
+        // Sécurité : effacer le mot de passe quand la page est quittée
+        window.addEventListener('beforeunload', function() {
+            if (!isAuthenticated) {
+                document.getElementById('password').value = '';
+            }
+        });
+        
+        // Focus sur le champ identifiant au chargement de la page
+        window.onload = function() {
+            document.getElementById('username').focus();
+            updateAttemptsCounter();
+        };
+    </script>
+</body>
+</html>
