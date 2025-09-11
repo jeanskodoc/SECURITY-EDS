@@ -27,7 +27,7 @@
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             overflow: hidden;
             animation: fadeIn 0.8s ease;
         }
@@ -60,6 +60,33 @@
         
         .form-container {
             padding: 30px;
+        }
+        
+        .user-type-selector {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+        }
+        
+        .user-type {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        
+        .user-type.active {
+            background: #2c3e50;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-type:not(:last-child) {
+            border-right: 1px solid #ddd;
         }
         
         .input-group {
@@ -219,6 +246,11 @@
             .header h1 {
                 font-size: 22px;
             }
+            
+            .user-type {
+                padding: 10px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -233,6 +265,12 @@
         <div class="form-container">
             <div id="error-message" class="message error"></div>
             <div id="success-message" class="message success">Connexion réussie! Accès autorisé.</div>
+            
+            <div class="user-type-selector">
+                <div class="user-type active" data-type="parent">Parent</div>
+                <div class="user-type" data-type="enseignant">Enseignant</div>
+                <div class="user-type" data-type="administration">Administration</div>
+            </div>
             
             <form id="login-form">
                 <div class="input-group">
@@ -270,13 +308,42 @@
     </div>
 
     <script>
-        // Compte créé selon vos instructions
+        // Comptes créés selon vos instructions
         const authorizedUsers = {
-            "KOLA": "KOLA1@"
+            // Compte parent
+            "parent": {
+                "username": "PARENT",
+                "password": "PARENT1@"
+            },
+            // Compte enseignant
+            "enseignant": {
+                "username": "ENSEIGNANT",
+                "password": "ENSEIGNANT1@"
+            },
+            // Compte administration
+            "administration": {
+                "username": "KOLA",
+                "password": "KOLA1@"
+            }
         };
         
         let loginAttempts = 3;
         let isAuthenticated = false;
+        let currentUserType = "parent";
+        
+        // Fonction pour changer le type d'utilisateur
+        function setUserType(type) {
+            currentUserType = type;
+            
+            // Mettre à jour l'interface
+            document.querySelectorAll('.user-type').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`.user-type[data-type="${type}"]`).classList.add('active');
+            
+            // Mettre à jour le placeholder
+            document.getElementById('username').placeholder = `Votre identifiant ${type}`;
+        }
         
         // Fonction pour afficher/masquer le mot de passe
         function togglePassword() {
@@ -341,8 +408,10 @@
             
             // Validation
             if (username && password) {
-                // Vérification des identifiants
-                if (authorizedUsers[username] === password) {
+                // Vérification des identifiants selon le type d'utilisateur
+                const user = authorizedUsers[currentUserType];
+                
+                if (username === user.username && password === user.password) {
                     isAuthenticated = true;
                     showSuccess();
                     
@@ -371,6 +440,13 @@
             } else {
                 showError('Veuillez remplir tous les champs.');
             }
+        });
+        
+        // Ajouter les écouteurs d'événements pour les types d'utilisateurs
+        document.querySelectorAll('.user-type').forEach(el => {
+            el.addEventListener('click', function() {
+                setUserType(this.getAttribute('data-type'));
+            });
         });
         
         // Sécurité : effacer le mot de passe quand la page est quittée
